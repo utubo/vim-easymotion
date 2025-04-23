@@ -110,7 +110,11 @@ function! EasyMotion#highlight#InitHL(group, colors) " {{{
 
     " Check if the hl group exists
     if hlexists(a:group)
-        redir => hlstatus | exec 'silent hi ' . a:group | redir END
+        if v:version < 800
+            redir => hlstatus | exec 'silent hi ' . a:group | redir END
+        else
+            let hlstatus = execute('silent hi ' . a:group)
+        endif
 
         " Return if the group isn't cleared
         if hlstatus !~ 'cleared'
@@ -207,9 +211,13 @@ function! EasyMotion#highlight#capture(hlname) "{{{
         let save_verbose = &verbose
         let &verbose = 0
         try
-            redir => HL_SAVE
-            execute 'silent! highlight ' . hlname
-            redir END
+            if v:version < 800
+                redir => HL_SAVE
+                execute 'silent! highlight ' . hlname
+                redir END
+            else
+                let HL_SAVE = execute('silent! highlight ' . hlname)
+            endif
         finally
             let &verbose = save_verbose
         endtry
